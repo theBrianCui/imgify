@@ -2,12 +2,26 @@
 
 using namespace cimg_library;
 
+void drawText(CImg<unsigned char>& img, const char* str) {
+    size_t len = strlen(str);
+    size_t i = 0;
+
+    while (i < len - 3) {
+        const unsigned char color[] = { str[i], str[i + 1], str[i + 2] };
+        img.draw_point(i, 0, color);
+        i += 3;
+    }
+}
+
 int main() {
+    const char* mystring = "Hello, World!";
+    
     // width, height, depth, channels
-    CImg<unsigned char> img(640, 400, 1, 3);
+    CImg<unsigned char> img(500, 500, 1, 3);
     img.fill(0);
-    unsigned char purple[] = { 255, 0, 255 };
+    const unsigned char purple[] = { 255, 0, 255 };
     img.draw_text(100, 100, "Hello World", purple);
+    drawText(img, mystring);
     img.save("file.bmp");
     return 0;
 }
