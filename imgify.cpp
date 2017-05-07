@@ -8,7 +8,12 @@ void drawText(CImg<unsigned char>& img, const char* str) {
 
     while (i < len - 3) {
         const unsigned char color[] = { str[i], str[i + 1], str[i + 2] };
-        img.draw_point(i, 0, color);
+        for (size_t j = i; j < i + 3; ++j) {
+            for (size_t k = i; k < i + 3; ++k) {
+                img.draw_point(j, k, color);
+            }
+        }
+
         i += 3;
     }
 }
