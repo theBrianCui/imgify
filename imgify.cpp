@@ -40,6 +40,7 @@ struct pixel {
     }
 };
 
+// compute the probability of expansion based on neighboring pixels
 double expand_probability(CImg<unsigned char>& img,
                           std::set<pixel>& visited_set,
                           const pixel& point) {
