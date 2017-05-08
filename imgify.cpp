@@ -41,35 +41,25 @@ bool is_surrounded(CImg<unsigned char>& img,
                    std::set<pixel>& visited_set,
                    const pixel& point);
 
-void rbloom(CImg<unsigned char>& img,
-            std::set<pixel>& visited_set,
-            const pixel& point) {
-
-}
-
-bool is_surrounded(CImg<unsigned char>& img,
-                   std::set<pixel>& visited_set,
-                   const pixel& point) {
+double expand_probability(CImg<unsigned char>& img,
+                          std::set<pixel>& visited_set,
+                          const pixel& point) {
     const int dx[] = { 0, 0, 1, -1 };
     const int dy[] = { 1, -1, 0, 0 };
-    bool surrounded = true;
+    int neighbors = 0;
 
     for (int i = 0; i < 4; ++i) {
-        // filter invalid pixels
         if ((point.x == 0 && dx[i] == -1)
             || (point.y == 0 && dy[i] == -1)
             || (point.x == (img.width() - 1) && dx[i] == 1)
-            || (point.y == (img.height() - 1) && dy[i] == 1))
-            continue;
-
-        pixel neighbor(point.x + dx[i], point.y + dy[i]);
-        if (visited_set.find(neighbor) == visited_set.end()) {
-            surrounded = false;
-            break;
-        }
+            || (point.y == (img.height() - 1) && dy[i] == 1)
+            || (visited_set.find(pixel(point.x + dx[i], point.y + dy[i])) != visited_set.end()))
+            ++neighbors;
     }
 
-    return surrounded;
+    if (neighbors == 4 || neighbors == 3) return 1.0;
+    if (neighbors == 2) return 0.75;
+    return EXPAND_P;
 }
 
 void bloom(CImg<unsigned char>& img,
@@ -103,11 +93,10 @@ void bloom(CImg<unsigned char>& img,
                                           (point.color[2] + ((rand() % 9) - 4)) % 256 };
 
             pixel new_point(point.x + dx[i], point.y + dy[i], new_color);
-            double x = ((double) rand() / (RAND_MAX));
 
             // expand with a probability of EXPAND_P
             if (visited_set.find(new_point) == visited_set.end()
-                && (x < EXPAND_P || is_surrounded(img, visited_set, new_point))) {
+                && ((double) rand() / (RAND_MAX)) < expand_probability(img, visited_set, new_point)) {
 
                 visited_set.insert(new_point);
 
