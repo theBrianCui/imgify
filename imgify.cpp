@@ -1,7 +1,8 @@
 #include "CImg.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <set>
-#define EXPAND_P 0.35
+#define EXPAND_P 0.5
 using namespace cimg_library;
 
 struct coordinate {
@@ -45,9 +46,9 @@ void rbloom(CImg<unsigned char>& img,
             const coordinate& point,
             unsigned char root_color[]) {
     
-    int dx[] = { 0, 0, 1, -1 };
-    int dy[] = { 1, -1, 0, 0 };
-    int valid_spots = 0;
+    const int dx[] = { 0, 0, 1, -1 };
+    const int dy[] = { 1, -1, 0, 0 };
+    // int valid_spots = 0;
 
     for (int i = 0; i < 4; ++i) {
         // filter invalid coordinates
@@ -60,9 +61,13 @@ void rbloom(CImg<unsigned char>& img,
         coordinate new_point(point.x + dx[i], point.y + dy[i]);
         double x = ((double) rand() / (RAND_MAX));
 
+        // printf("Double x: %f\n", x);
+        // printf("Double expand_p: %f\n", EXPAND_P);
+        // printf("less than? %d\n", x < EXPAND_P);
+
         // expand with a probability of EXPAND_P
         if (x < EXPAND_P &&
-            visited_set.find(new_point) != visited_set.end()) {
+            visited_set.find(new_point) == visited_set.end()) {
             visited_set.insert(new_point);
 
             // draw and recurse
