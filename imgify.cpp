@@ -7,10 +7,12 @@
 using namespace cimg_library;
 
 struct pixel {
+    // comparison and ordering, ignore color value
     friend bool operator == (const pixel& lhs, const pixel& rhs) {
         return lhs.x == rhs.x && lhs.y == rhs.y;
     }
 
+    // ordering required for std::set
     friend bool operator < (const pixel& lhs, const pixel& rhs) {
         if (lhs.x < rhs.x) return true;
         else if (lhs.x > rhs.x) return false;
@@ -21,6 +23,7 @@ struct pixel {
     size_t y;
     unsigned char color[3];
 
+    // generate a random color for pixels without an assigned color
     pixel(size_t x, size_t y) : x (x), y (y) {
         unsigned char rand_color[3] = { rand() % 256, rand() % 256, rand() % 256 };
         this->setColor(rand_color);
@@ -36,10 +39,6 @@ struct pixel {
         this->color[2] = color[2];
     }
 };
-
-bool is_surrounded(CImg<unsigned char>& img,
-                   std::set<pixel>& visited_set,
-                   const pixel& point);
 
 double expand_probability(CImg<unsigned char>& img,
                           std::set<pixel>& visited_set,
@@ -110,7 +109,6 @@ void bloom(CImg<unsigned char>& img,
 }
 
 int main() {
-    const char* mystring = "Hello, World!";
     std::set<pixel> visited_set;
 
     // width, height, depth, channels
@@ -119,6 +117,7 @@ int main() {
     
     bloom(img, visited_set, pixel(250, 250));
 
+    // Fill in remining untouched pixels
     for (int i = 0; i < 500; ++i) {
         for (int j = 0; j < 500; ++j) {
             pixel point(i, j);
@@ -127,7 +126,6 @@ int main() {
             }
         }
     }
-    // bloom(img, visited_set, pixel(0, 0), init_color);
 
     img.save("file.bmp");
     return 0;
