@@ -1,10 +1,18 @@
 #include "CImg.h"
+#include <stdlib.h>
 #include <set>
+#define EXPAND_P 0.35
 using namespace cimg_library;
 
 struct coordinate {
     friend bool operator == (const coordinate& lhs, const coordinate& rhs) {
         return lhs.x == rhs.x && lhs.y == rhs.y;
+    }
+
+    friend bool operator < (const coordinate& lhs, const coordinate& rhs) {
+        if (lhs.x < rhs.x) return true;
+        else if (lhs.x > rhs.x) return false;
+        else return lhs.y < rhs.y;
     }
 
     size_t x;
@@ -32,16 +40,10 @@ void drawText(CImg<unsigned char>& img, const char* str) {
     }
 }
 
-void bloom(CImg<unsigned char>& img, 
-           std::set<coordinate>& visited_set, 
-           size_t seed) {
-    
-}
-
 void rbloom(CImg<unsigned char>& img,
             std::set<coordinate>& visited_set,
-            coordinate& point,
-            unsigned char root[]) {
+            const coordinate& point,
+            unsigned char root_color[]) {
     
     int dx[] = { 0, 0, 1, -1 };
     int dy[] = { 1, -1, 0, 0 };
@@ -56,10 +58,27 @@ void rbloom(CImg<unsigned char>& img,
             continue;
 
         coordinate new_point(point.x + dx[i], point.y + dy[i]);
-        if (visited_set.find(new_point) != visited_set.end()) {
+        double x = ((double) rand() / (RAND_MAX));
+
+        // expand with a probability of EXPAND_P
+        if (x < EXPAND_P &&
+            visited_set.find(new_point) != visited_set.end()) {
             visited_set.insert(new_point);
+
+            // draw and recurse
+            img.draw_point(new_point.x, new_point.y, root_color);
+            rbloom(img, visited_set, new_point, root_color);
         }
     }
+}
+
+void bloom(CImg<unsigned char>& img, 
+           std::set<coordinate>& visited_set, 
+           const coordinate& point,
+           unsigned char root_color[]) {
+    img.draw_point(point.x, point.y, root_color);
+    visited_set.insert(point);
+    rbloom(img, visited_set, point, root_color);
 }
 
 int main() {
@@ -70,7 +89,9 @@ int main() {
     CImg<unsigned char> img(500, 500, 1, 3);
     img.fill(0);
 
-    drawText(img, mystring);
+    unsigned char init_color[3] = { 0, 255, 0 };
+    bloom(img, visited_set, coordinate(250, 250), init_color);
+
     img.save("file.bmp");
     return 0;
 }
